@@ -15,6 +15,7 @@ func (app *application) routes() *httprouter.Router {
 	// respectively.
 	router.HandlerFunc(http.MethodGet, "/v1/healthcheck", app.healthcheckHandler)
 	router.HandlerFunc(http.MethodPost, "/v1/jobs", app.createJobHandler)
+
 	router.HandlerFunc(http.MethodGet, "/v1/jobs/:id", app.showJobHandler)
 	// Return the httprouter instance.
 	return router
