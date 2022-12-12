@@ -1,8 +1,9 @@
 package main
 
 import (
-	"github.com/julienschmidt/httprouter"
 	"net/http"
+
+	"github.com/julienschmidt/httprouter"
 )
 
 func (app *application) routes() *httprouter.Router {
@@ -13,8 +14,9 @@ func (app *application) routes() *httprouter.Router {
 	// http.MethodPost are constants which equate to the strings "GET" and "POST"
 	// respectively.
 	router.HandlerFunc(http.MethodGet, "/v1/healthcheck", app.healthcheckHandler)
-	router.HandlerFunc(http.MethodPost, "/v1/movies", app.createJobHandler)
-	router.HandlerFunc(http.MethodGet, "/v1/movies/:id", app.showJobHandler)
+	router.HandlerFunc(http.MethodPost, "/v1/jobs", app.createJobHandler)
+
+	router.HandlerFunc(http.MethodGet, "/v1/jobs/:id", app.showJobHandler)
 	// Return the httprouter instance.
 	return router
 }
