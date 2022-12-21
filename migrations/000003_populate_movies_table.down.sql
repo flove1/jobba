@@ -1,0 +1,2 @@
+DELETE FROM movies;
+ALTER SEQUENCE movies_id_seq RESTART;
