@@ -78,7 +78,6 @@ func (m MovieModel) Get(id int64) (*Movie, error) {
 }
 
 func (m MovieModel) GetAll(title string, genres []string, filters Filters) ([]*Movie, Metadata, error) {
-
 	query := fmt.Sprintf(`
 		SELECT count(*) over(), id, created_at, title, year, runtime, genres, version
 		FROM movies
