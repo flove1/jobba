@@ -20,7 +20,7 @@ confirm:
 ## run/api: run the src/api application
 .PHONY: run
 run:
-	@go run ./src/api -db-dsn=${JOBBE_DB_DSN} -smtp-host="smtp.office365.com" -smtp-username=${EMAIL} -smtp-password=${EMAIL_PASSWORD} -smtp-sender="Jobbe <${EMAIL}>"
+	@go run ./src/api -db-dsn=${JOBBE_DB_DSN} -smtp-host="smtp.office365.com" -smtp-username=${EMAIL} -smtp-password="${EMAIL_PASSWORD}" -smtp-sender='Jobbe <${EMAIL}>'
 
 ## db/psql: connect to the database using psql
 .PHONY: psql
