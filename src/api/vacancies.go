@@ -42,6 +42,7 @@ func (app *application) createVacancyHandler(w http.ResponseWriter, r *http.Requ
 		app.serverErrorResponse(w, r, err)
 		return
 	}
+
 	headers := make(http.Header)
 	headers.Set("Location", fmt.Sprintf("/v1/vacancys/%d", vacancy.ID))
 
@@ -49,6 +50,26 @@ func (app *application) createVacancyHandler(w http.ResponseWriter, r *http.Requ
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
+
+	app.background(func() {
+		data := map[string]any{
+			"title":   vacancy.Title,
+			"company": vacancy.Company,
+			"tags":    vacancy.Tags,
+		}
+		for _, tag := range vacancy.Tags {
+			subscribers, err := app.models.Subscribers.GetAllByTag(tag)
+			if err != nil {
+				app.serverErrorResponse(w, r, err)
+			}
+			for _, subscriber := range subscribers {
+				err = app.mailer.Send(subscriber.Email, "new_vacancy.tmpl", data)
+				if err != nil {
+					app.logger.PrintError(err, nil)
+				}
+			}
+		}
+	})
 }
 
 func (app *application) deleteVacancyHandler(w http.ResponseWriter, r *http.Request) {

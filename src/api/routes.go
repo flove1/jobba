@@ -24,6 +24,10 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodPost, "/v1/users", app.registerUserHandler)
 	router.HandlerFunc(http.MethodPut, "/v1/users/activated", app.activateUserHandler)
 
+	router.HandlerFunc(http.MethodGet, "/v1/subscribers/:id", app.requirePermission("subscribers:read", app.listSubscribersHandler))
+	router.HandlerFunc(http.MethodPost, "/v1/subscribers", app.requirePermission("subscribers:write", app.createSubscriberHandler))
+	router.HandlerFunc(http.MethodDelete, "/v1/subscribers/:id", app.requirePermission("subscribers:write", app.deleteSubscriberHandler))
+
 	router.HandlerFunc(http.MethodPost, "/v1/tokens/authentication", app.createAuthenticationTokenHandler)
 
 	router.Handler(http.MethodGet, "/debug/vars", app.requirePermission("debug", expvar.Handler().ServeHTTP))

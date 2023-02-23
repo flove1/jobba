@@ -9,4 +9,4 @@ CREATE TABLE IF NOT EXISTS users_permissions (
 );
 -- Add the two permissions to the table.
 INSERT INTO permissions (code)
-VALUES ('vacancies:read'), ('vacancies:write'), ('debug');
+VALUES ('vacancies:read'), ('vacancies:write'), ('subscribers:read'), ('subscribers:write'), ('debug');
