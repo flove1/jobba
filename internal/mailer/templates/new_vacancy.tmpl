@@ -1,0 +1,39 @@
+{{define "subject"}}New vacancy that yoy are searching!{{end}}
+
+{{define "plainBody"}}
+Hi,
+
+There is a new vacancy that may suitable for you.
+
+Title:  {{.title}}
+Company:  {{.company}}
+Tags:  {{.tags}}
+
+{"token": "{{.activationToken}}"}
+
+Thanks,
+
+The Jobbe Team
+{{end}}
+
+{{define "htmlBody"}}
+<!doctype html>
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head>
+
+<body>
+    <p>Hi,</p>
+    <p>There is a new vacancy that may suitable for you.</p>
+    <p>Title:  {{.title}}</p>
+    <p>Company:  {{.company}}</p>
+    <p>Tags:  {{.tags}}</p>
+    <p>Thanks,</p>
+    <p>The Jobbe Team</p>
+</body>
+
+</html>
+{{end}}
