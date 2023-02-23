@@ -9,12 +9,11 @@ import (
 	"jobbe.service/internal/validator"
 )
 
-func (app *application) createMovieHandler(w http.ResponseWriter, r *http.Request) {
+func (app *application) createVacancyHandler(w http.ResponseWriter, r *http.Request) {
 	var input struct {
-		Title   string       `json:"title"`
-		Year    int32        `json:"year"`
-		Runtime data.Runtime `json:"runtime"`
-		Genres  []string     `json:"genres"`
+		Title   string   `json:"title"`
+		Company string   `json:"company"`
+		Tags    []string `json:"tags"`
 	}
 
 	err := app.readJSON(w, r, &input)
@@ -24,36 +23,35 @@ func (app *application) createMovieHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	movie := &data.Movie{
+	vacancy := &data.Vacancy{
 		Title:   input.Title,
-		Year:    input.Year,
-		Runtime: input.Runtime,
-		Genres:  input.Genres,
+		Company: input.Company,
+		Tags:    input.Tags,
 	}
 
 	v := validator.New()
 
-	if data.ValidateMovie(v, movie); !v.Valid() {
+	if data.ValidateVacancy(v, vacancy); !v.Valid() {
 		app.failedValidationResponse(w, r, v.Errors)
 		return
 	}
 
-	err = app.models.Movies.Insert(movie)
+	err = app.models.Vacancies.Insert(vacancy)
 
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 		return
 	}
 	headers := make(http.Header)
-	headers.Set("Location", fmt.Sprintf("/v1/movies/%d", movie.ID))
+	headers.Set("Location", fmt.Sprintf("/v1/vacancys/%d", vacancy.ID))
 
-	err = app.writeJSON(w, http.StatusCreated, envelope{"movie": movie}, headers)
+	err = app.writeJSON(w, http.StatusCreated, envelope{"vacancy": vacancy}, headers)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
 }
 
-func (app *application) deleteMovieHandler(w http.ResponseWriter, r *http.Request) {
+func (app *application) deleteVacancyHandler(w http.ResponseWriter, r *http.Request) {
 	id, err := app.readIDParam(r)
 
 	if err != nil || id < 1 {
@@ -61,7 +59,7 @@ func (app *application) deleteMovieHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	err = app.models.Movies.Delete(id)
+	err = app.models.Vacancies.Delete(id)
 
 	if err != nil {
 		switch {
@@ -72,14 +70,14 @@ func (app *application) deleteMovieHandler(w http.ResponseWriter, r *http.Reques
 		}
 	}
 
-	err = app.writeJSON(w, http.StatusOK, envelope{"message": "movie successfully deleted"}, nil)
+	err = app.writeJSON(w, http.StatusOK, envelope{"message": "vacancy successfully deleted"}, nil)
 	if err != nil {
 
 		app.serverErrorResponse(w, r, err)
 	}
 }
 
-func (app *application) updateMovieHandler(w http.ResponseWriter, r *http.Request) {
+func (app *application) updateVacancyHandler(w http.ResponseWriter, r *http.Request) {
 	id, err := app.readIDParam(r)
 
 	if err != nil || id < 1 {
@@ -87,7 +85,7 @@ func (app *application) updateMovieHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	movie, err := app.models.Movies.Get(id)
+	vacancy, err := app.models.Vacancies.Get(id)
 	if err != nil {
 		switch {
 		case errors.Is(err, data.ErrRecordNotFound):
@@ -99,10 +97,10 @@ func (app *application) updateMovieHandler(w http.ResponseWriter, r *http.Reques
 	}
 
 	var input struct {
-		Title   *string       `json:"title"`
-		Year    *int32        `json:"year"`
-		Runtime *data.Runtime `json:"runtime"`
-		Genres  []string      `json:"genres"`
+		Title   *string  `json:"title"`
+		Company *string  `json:"company"`
+		Tags    []string `json:"tags"`
+		Active  *bool    `json:"active"`
 	}
 
 	err = app.readJSON(w, r, &input)
@@ -113,29 +111,29 @@ func (app *application) updateMovieHandler(w http.ResponseWriter, r *http.Reques
 	}
 
 	if input.Title != nil {
-		movie.Title = *input.Title
+		vacancy.Title = *input.Title
 	}
 
-	if input.Year != nil {
-		movie.Year = *input.Year
+	if input.Company != nil {
+		vacancy.Company = *input.Company
 	}
 
-	if input.Runtime != nil {
-		movie.Runtime = *input.Runtime
+	if input.Tags != nil {
+		vacancy.Tags = input.Tags
 	}
 
-	if input.Genres != nil {
-		movie.Genres = input.Genres
+	if input.Active != nil {
+		vacancy.Active = *input.Active
 	}
 
 	v := validator.New()
 
-	if data.ValidateMovie(v, movie); !v.Valid() {
+	if data.ValidateVacancy(v, vacancy); !v.Valid() {
 		app.failedValidationResponse(w, r, v.Errors)
 		return
 	}
 
-	err = app.models.Movies.Update(movie)
+	err = app.models.Vacancies.Update(vacancy)
 
 	if err != nil {
 		switch {
@@ -146,7 +144,7 @@ func (app *application) updateMovieHandler(w http.ResponseWriter, r *http.Reques
 		}
 	}
 
-	err = app.writeJSON(w, http.StatusOK, envelope{"movie": movie}, nil)
+	err = app.writeJSON(w, http.StatusOK, envelope{"vacancy": vacancy}, nil)
 
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
@@ -154,7 +152,7 @@ func (app *application) updateMovieHandler(w http.ResponseWriter, r *http.Reques
 
 }
 
-func (app *application) showMovieHandler(w http.ResponseWriter, r *http.Request) {
+func (app *application) showVacancyHandler(w http.ResponseWriter, r *http.Request) {
 	id, err := app.readIDParam(r)
 
 	if err != nil || id < 1 {
@@ -162,7 +160,7 @@ func (app *application) showMovieHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	movie, err := app.models.Movies.Get(id)
+	vacancy, err := app.models.Vacancies.Get(id)
 
 	if err != nil {
 		switch {
@@ -174,39 +172,39 @@ func (app *application) showMovieHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	err = app.writeJSON(w, http.StatusOK, envelope{"movie": movie}, nil)
+	err = app.writeJSON(w, http.StatusOK, envelope{"vacancy": vacancy}, nil)
 
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
 }
 
-func (app *application) listMoviesHandler(w http.ResponseWriter, r *http.Request) {
+func (app *application) listVacanciesHandler(w http.ResponseWriter, r *http.Request) {
 	var input struct {
-		Title  string
-		Genres []string
+		Title string
+		Tags  []string
 		data.Filters
 	}
 	v := validator.New()
 	qs := r.URL.Query()
 	input.Title = app.readString(qs, "title", "")
-	input.Genres = app.readCSV(qs, "genres", []string{})
+	input.Tags = app.readCSV(qs, "tags", []string{})
 	input.Filters.Page = app.readInt(qs, "page", 1, v)
 	input.Filters.PageSize = app.readInt(qs, "page_size", 20, v)
 	input.Filters.Sort = app.readString(qs, "sort", "id")
-	input.Filters.SortSafelist = []string{"id", "title", "year", "runtime", "-id", "-title", "-year", "-runtime"}
+	input.Filters.SortSafelist = []string{"id", "title", "company", "-id", "-title", "-company"}
 
 	if data.ValidateFilters(v, input.Filters); !v.Valid() {
 		app.failedValidationResponse(w, r, v.Errors)
 		return
 	}
 
-	movies, metadata, err := app.models.Movies.GetAll(input.Title, input.Genres, input.Filters)
+	vacancies, metadata, err := app.models.Vacancies.GetAll(input.Title, input.Tags, input.Filters)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 		return
 	}
-	err = app.writeJSON(w, http.StatusOK, envelope{"movies": movies, "metadata": metadata}, nil)
+	err = app.writeJSON(w, http.StatusOK, envelope{"vacancies": vacancies, "metadata": metadata}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
